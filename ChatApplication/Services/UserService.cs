@@ -17,18 +17,6 @@ namespace ChatApp.Services
             return await _context.Users.ToListAsync();
         }
 
-        public async void CreateUserAsync(User user)
-        {
-            var newUser = new User
-            {
-                Id = user.Id,
-                Name = user.Name,
-                JoinedOn = DateTime.UtcNow
-            };
-            _context.Users.Add(newUser);
-            await _context.SaveChangesAsync();
-        }
-
         public async Task<User> JoinAsync(User userJoining)
         {
             var normalizedName = userJoining.Name.Trim().ToUpperInvariant();
