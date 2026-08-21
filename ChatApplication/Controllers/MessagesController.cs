@@ -1,6 +1,8 @@
 using ChatApp.Services;
+using ChatApplication.Hubs;
 using ChatApplication.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.Controllers
 {
@@ -9,10 +11,10 @@ namespace ChatApp.Controllers
     public class MessagesController : ControllerBase
     {
         private readonly MessageService _messageService;
-
-        public MessagesController(
-    MessageService messageService)
+        private readonly IHubContext<ChatHub> _hubContext;
+        public MessagesController(MessageService messageService, IHubContext<ChatHub> hubContext)
         {
+            _hubContext = hubContext;
             _messageService = messageService;
         }
 
@@ -28,6 +30,10 @@ namespace ChatApp.Controllers
         {
 
             var msgResponse = await _messageService.CreateMessageAsync(request);
+            await _hubContext.Clients.All.SendAsync(
+            "ReceiveMessage",
+            msgResponse
+        );
             return Ok(msgResponse);
         }
     }
