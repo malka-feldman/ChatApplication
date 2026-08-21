@@ -1,7 +1,9 @@
 ﻿
 using ChatApp.Services;
+using ChatApplication.Hubs;
 using ChatApplication.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.SignalR;
 
 namespace ChatApp.Controllers
 {
@@ -10,9 +12,10 @@ namespace ChatApp.Controllers
     public class UsersController : ControllerBase
     {
         private readonly UserService _userService;
-
-        public UsersController(UserService userService)
+        private readonly IHubContext<ChatHub> _hubContext;
+        public UsersController(UserService userService, IHubContext<ChatHub> hubContext)
         {
+            _hubContext = hubContext;
             _userService = userService;
         }
 
@@ -33,6 +36,7 @@ namespace ChatApp.Controllers
                 NormalizedName = req.Name.ToUpper()
             };
             var user = await _userService.JoinAsync(newUser);
+            await _hubContext.Clients.All.SendAsync("AddUser", user);
             return Ok(user);
         }
     }
