@@ -7,6 +7,7 @@ namespace ChatApplication.Hubs
     {
         private static readonly ConcurrentDictionary<int, HashSet<string>> OnlineUsers = new();
 
+        //invoked when user logs in
         public async Task JoinChat(int userId)
         {
             var connections = OnlineUsers.GetOrAdd(
@@ -29,6 +30,7 @@ namespace ChatApplication.Hubs
             );
         }
 
+        //invoked when user leaves chat or closes tab etc
         public override async Task OnDisconnectedAsync(Exception? exception)
         {
             foreach (var user in OnlineUsers)
