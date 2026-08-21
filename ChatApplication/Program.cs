@@ -1,4 +1,6 @@
+using ChatApp.Services;
 using ChatApplication.Data;
+using ChatApplication.Hubs;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +17,23 @@ builder.Services.AddDbContext<ChatAppDbContext>(options =>
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddScoped<UserService>();
+builder.Services.AddScoped<MessageService>();
+builder.Services.AddSignalR();
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("ReactPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:5173")
+            .AllowAnyHeader()
+            .AllowAnyMethod()
+            .AllowCredentials();
+    });
+});
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -28,6 +47,10 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+app.UseCors("ReactPolicy");
+
 app.MapControllers();
+
+app.MapHub<ChatHub>("/chatHub");
 
 app.Run();
