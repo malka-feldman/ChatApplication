@@ -24,7 +24,7 @@ namespace ChatApp.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CreateMessage(Message request)
+        public async Task<IActionResult> CreateMessage(MessageRequest request)
         {
 
             var msgResponse = await _messageService.CreateMessageAsync(request);
