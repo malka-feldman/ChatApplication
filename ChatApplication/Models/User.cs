@@ -13,4 +13,9 @@
         public List<Message> Messages { get; set; } = new List<Message>();
     }
 
+    public class UserJoinRequest
+    {
+        public string Name { get; set; }
+    }
+
 }

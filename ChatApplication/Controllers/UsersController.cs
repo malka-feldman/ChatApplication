@@ -25,9 +25,14 @@ namespace ChatApp.Controllers
 
 
         [HttpPost("Join")]
-        public async Task<IActionResult> Join(User userJoining)
+        public async Task<IActionResult> Join(UserJoinRequest req)
         {
-            var user = await _userService.JoinAsync(userJoining);
+            var newUser = new User
+            {
+                Name = req.Name,
+                NormalizedName = req.Name.ToUpper()
+            };
+            var user = await _userService.JoinAsync(newUser);
             return Ok(user);
         }
     }
