@@ -122,20 +122,10 @@ function App() {
 
         //Add new user to users list
         connection.on("AddUser", (user) => {
-            setUsers(currentUsers => {
-                if (
-                    currentUsers.some(
-                        currentUser => currentUser.id === user.id
-                    )
-                ) {
-                    return currentUsers;
-                }
-
-                return [
+            setUsers(currentUsers => [
                     ...currentUsers,
                     user
-                ];
-            });
+            ]);
         });
     };
 
