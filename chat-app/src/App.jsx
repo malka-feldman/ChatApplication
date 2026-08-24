@@ -270,7 +270,7 @@ function App() {
             setMessage={setMessage}
             sendMessage={sendMessage}
             leaveChat={leaveChat}
-    loading = { loading }/>
+            loading={loading} />
     );
 }
 
