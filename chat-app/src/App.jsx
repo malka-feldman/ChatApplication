@@ -194,8 +194,11 @@ function App() {
 
             setUsers(data);
 
+            return data;
+
         } catch (error) {
             console.error("Error getting users:", error);
+            return [];
         }
     };
 
