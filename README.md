@@ -4,11 +4,11 @@ Set Up Instructions:
 
 1. Clone the Repository
 2. Create the DB
-3. If Using Visual Studio under Tools, NuGet Package Manager, Package Manager Console
-  1. Add-Migration InitialCreate 
-  2. Update-Database
+  -  If Using Visual Studio under Tools, NuGet Package Manager, Package Manager Console
+    1. Add-Migration InitialCreate 
+    2. Update-Database
 4. In React Front End Folder, run npm install
-5. Start Front End -> cd ClientFolder, run npm run dev
+5. Start Front End -> cd ClientFolder, run: npm run dev
 6. Once both applications are running these are the working functionalities:
     - Enter a username to join the chat.
     - The user will be added to the database if they don't already exist. 
