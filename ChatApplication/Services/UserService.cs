@@ -17,15 +17,16 @@ namespace ChatApp.Services
             return await _context.Users.ToListAsync();
         }
 
-        public async Task<User> JoinAsync(User userJoining)
+        public async Task<(bool, User)> JoinAsync(User userJoining)
         {
             var normalizedName = userJoining.Name.Trim().ToUpperInvariant();
-
+            bool isNew = false;
             var user = await _context.Users
                 .FirstOrDefaultAsync(u => u.NormalizedName == normalizedName);
 
             if (user == null)
             {
+                isNew = true;
                 user = new User
                 {
                     Name = userJoining.Name.Trim(),
@@ -36,7 +37,7 @@ namespace ChatApp.Services
                 _context.Users.Add(user);
                 await _context.SaveChangesAsync();
             }
-            return user;
+            return (isNew, user);
         }
     }
 }

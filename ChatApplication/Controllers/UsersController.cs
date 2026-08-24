@@ -35,8 +35,11 @@ namespace ChatApp.Controllers
                 Name = req.Name,
                 NormalizedName = req.Name.ToUpper()
             };
-            var user = await _userService.JoinAsync(newUser);
+            var (isNew, user) = await _userService.JoinAsync(newUser);
+            if (isNew)
+            {
             await _hubContext.Clients.All.SendAsync("AddUser", user);
+            }
             return Ok(user);
         }
     }
