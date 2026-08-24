@@ -53,7 +53,7 @@ function JoinScreen({ joinChat }) {
                     onChange={(e) => setUserName(e.target.value)}
                     onKeyDown={(e) => {
                         if (e.key === "Enter") {
-                            joinChat();
+                            joinChat(userName);
                         }
                     }}
                     sx={{ mb: 2 }}
@@ -63,7 +63,7 @@ function JoinScreen({ joinChat }) {
                     fullWidth
                     variant="contained"
                     size="large"
-                    onClick={joinChat}
+                    onClick={() => joinChat(userName)}
                     disabled={!userName.trim()}
                 >
                     Join Chat

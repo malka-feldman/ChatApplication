@@ -37,7 +37,7 @@ function App() {
         }
     }, [currentUser]);
 
-    const joinChat = async () => {
+    const joinChat = async (userName) => {
         if (!userName.trim()) {
             return;
         }
@@ -207,7 +207,6 @@ const leaveChat = async () => {
     sessionStorage.removeItem("currentUserId");
     setConnection(null);
     setCurrentUser(null);
-    setUserName("")
 };
 
 /*
