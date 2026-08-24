@@ -4,11 +4,11 @@ Set Up Instructions:
 
 1. Clone the Repository
 2. Create the DB
-  -  If Using Visual Studio under Tools, NuGet Package Manager, Package Manager Console
+  -  If Using Visual Studio under Tools, NuGet Package Manager, Package Manager Console, RUN:
     1. Add-Migration InitialCreate 
     2. Update-Database
-4. In React Front End Folder, run npm install
-5. Start Front End -> cd ClientFolder, run: npm run dev
+4. In React Front End Folder, RUN: npm install
+5. Start Front End -> cd ClientFolder, RUN: npm run dev
 6. Once both applications are running these are the working functionalities:
     - Enter a username to join the chat.
     - The user will be added to the database if they don't already exist. 
@@ -59,33 +59,54 @@ A user can have many messages. 
 
 Scenarios to Consider 
 
-1. Refreshing the page resets the React client state, so the user is 
+1. Same User Opens the App in two tabs, then closes one of them. In my ChatHub.cs I look out for this by mapping each user ID to a set of SignalR connection IDs. When a user opens two tabs, each tab gets its own connection ID, so both are stored under the same user. When one tab closes, OnDisconnectedAsync removes only that connection ID. I only consider the user offline when their set of connection IDs becomes empty. This prevents the user from incorrectly appearing offline just because one of their tabs or devices disconnected.
+   
+2. Refreshing the page resets the React client state, so the user is 
 returned to the join screen. Re-entering the same name reconnects them to
-their existing user rather than creating a new user. If had more time can 
+their existing user, since the user is persisted in the db. If had more time can 
 work on saving to local storage, so refreshing page does not log them out.
+-Update 8/23/2026
+    1. Added session storage restoration. When the page is refreshed, the app
+  checks session storage for the saved user ID. If a user is found, the
+  React state is restored and a new SignalR connection is established for
+  that user.
 
-2. If two users try to enter with the same name at the same time, I first check in the backend to see if a user with that name already exists.
-However, that check alone isn't enough because two requests could happen concurrently
-and both could find that the name doesn't exist. To handle that case, I have a unique
-database constraint on the normalized name. SQL Server guarantees that this constraint
-is enforced even when multiple operations are happening concurrently, so only one of the
-requests can successfully create that username. (Right now nothing happens to
+    2. While implementing this, I noticed that the useEffect responsible for
+  restoring the user was running twice during development. This caused two
+  SignalR connections to be created for the same user, resulting in two
+  connection IDs. Because of this, the connection count was inaccurate and
+  a user could remain online even after its one connection was removed. I fixed
+  the duplicate connection so that only one SignalR connection is created
+  during initialization.
+
+3. A user closes their browser or loses network connectivity without disconnecting cleanly.
+When the browser/tab closes, the SignalR connection is terminated. React client is handling automatic reconnections...
+
+4. If two users try to enter with the same name at the same time, I first check in the DB to see if a user with that name already exists.
+However, that check alone isn't enough because two requests could happen concurrently and both could find that the name doesn't exist. To handle that case, I have a unique database constraint on the normalized name. SQL Server guarantees that this constraint is enforced even when multiple operations are happening concurrently, so only one of the requests can successfully create that username. (Right now nothing happens to
 that second request exception that will be thrown)
 
-3. Server restart: Users and messages are persisted in SQL Server, 
-so they survive a server restart. SignalR connections do not. After a restart, existing connections are
-lost and users are considered offline until their clients establish new SignalR connections.
+5. Names that differ only by case or surrounding whitespace: `dj`, `DJ`, `" DJ "`.
+   Included a col in db by users called NormalizedName before entering a User it normalizes it by putting it into UPPERCASE and trimming it, this way when a user tries to join with a diff casing or space at end etc it will normalize before comparing it to other saved users
+
+6. Empty or whitespace-only messages. Extremely long messages.
+   -Can add for UX to the FE if message is empty dont send it
+   -Can add check on BE as well
+
+7. Server restart: Users and messages are persisted in SQL Server, so they survive a server restart. SignalR connections do not. After a restart, existing connections are lost and users are considered offline until their clients establish new SignalR connections.
+
+8. Chat History Grows with Time
+
 
 More Time:
-1. Currently I broadcast AddUser when the join endpoint completes,
-   but on the frontend I check the user's ID before adding them to state.
-   This prevents duplicate users if an existing user rejoins.
-   If I had more time, I would make the backend API Join, distinguish between creating
-   a new user and returning an existing user, so that AddUser is
-   only broadcast when a new record is actually created.
+1. Broadcasting AddUser at the end of the Join API
+- any connected signalR connections will have the updated user
+-but that specific user/ client does not yet have their signalR connection started, so invoking AddUser essentially does nothing for that user
+(For now calling getUsers so that clients state will be updated)
 2. Add pagination for loading messages (case where there are 1000 messages)
 3. More server side and client side error handling
 4. Direct Messaging
+  
 
 
 
