@@ -13,8 +13,24 @@ function App() {
     const [loading, setLoading] = useState(true);
     const [connection, setConnection] = useState(null);
 
+
     useEffect(() => {
-        getUsers();
+        const initializeUser = async () => {
+            const savedUserId = localStorage.getItem("currentUserId");
+            const users = await getUsers();
+            if (savedUserId) {
+                const savedUser = users.find(
+                    u => u.id == savedUserId
+                );
+
+                if (savedUser) {
+                    setCurrentUser(savedUser);
+                    connectToChat(savedUser);
+                }
+            }
+        };
+
+        initializeUser();
     }, []);
 
     useEffect(() => {
@@ -47,10 +63,17 @@ function App() {
             }
 
             const user = await response.json();
-
+            localStorage.setItem("currentUserId", user.id.toString());
             setCurrentUser(user);
-            getUsers();
+          //  getUsers();
+          connectToChat(user)
 
+        } catch (error) {
+            console.error("Error joining chat:", error);
+        }
+    };
+
+    const connectToChat = async (user) => {
             const newConnection = new HubConnectionBuilder()
                 .withUrl("https://localhost:7087/chatHub")
                 .withAutomaticReconnect()
@@ -62,14 +85,10 @@ function App() {
             await newConnection.invoke("JoinChat", user.id);
 
             setConnection(newConnection);
-
-        } catch (error) {
-            console.error("Error joining chat:", error);
-        }
     };
 
-    const setUpConnectionListeners = (connection, currentUser) => {
 
+    const setUpConnectionListeners = (connection, currentUser) => 
         //Sets current user to online
         connection.on("UserOnline", (userId) => {
             setUsers(currentUsers =>
@@ -184,7 +203,7 @@ function App() {
         if (connection) {
             await connection.stop();
         }
-
+        localStorage.removeItem("currentUserId");
         setConnection(null);
         setCurrentUser(null);
         setUserName("")
