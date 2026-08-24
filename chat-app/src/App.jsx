@@ -65,7 +65,7 @@ function App() {
             const user = await response.json();
             localStorage.setItem("currentUserId", user.id.toString());
             setCurrentUser(user);
-          //  getUsers();
+            getUsers();
           connectToChat(user)
 
         } catch (error) {
@@ -88,7 +88,7 @@ function App() {
     };
 
 
-    const setUpConnectionListeners = (connection, currentUser) => 
+    const setUpConnectionListeners = (connection, currentUser) => { 
         //Sets current user to online
         connection.on("UserOnline", (userId) => {
             setUsers(currentUsers =>
