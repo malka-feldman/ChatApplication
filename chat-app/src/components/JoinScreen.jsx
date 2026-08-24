@@ -5,8 +5,12 @@ import {
     TextField,
     Button
 } from "@mui/material";
+import { useState } from 'react'
+function JoinScreen({ joinChat }) {
 
-function JoinScreen({ userName, setUserName, joinChat }) {
+    const [userName, setUserName] = useState("");
+
+
     return (
         <Box
             sx={{

@@ -12,7 +12,7 @@ import {
     CircularProgress,
     TextField
 } from "@mui/material";
-
+import { useState } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SendIcon from "@mui/icons-material/Send";
 
@@ -21,11 +21,45 @@ function ChatScreen({
     currentUser,
     messages,
     loading,
-    message,
-    setMessage,
     leaveChat,
-    sendMessage
-}) {
+})
+
+{
+    const [message, setMessage] = useState("");
+
+    const sendMessage = async () => {
+        if (!message.trim()) {
+            return;
+        }
+
+        const newMessage = {
+            userId: currentUser.id,
+            body: message
+        };
+
+        try {
+            const response = await fetch(
+                "https://localhost:7087/api/messages",
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(newMessage)
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error("Failed to send message");
+            }
+
+            setMessage("");
+
+        } catch (error) {
+            console.error("Error sending message:", error);
+        }
+    };
+
     return (
         <Box
             sx={{

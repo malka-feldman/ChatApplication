@@ -5,11 +5,9 @@ import ChatScreen from "./components/ChatScreen";
 import JoinScreen from "./components/JoinScreen";
 
 function App() {
-    const [message, setMessage] = useState("");
     const [messages, setMessages] = useState([]);
     const [users, setUsers] = useState([]);
     const [currentUser, setCurrentUser] = useState(null);
-    const [userName, setUserName] = useState("");
     const [loading, setLoading] = useState(true);
     const [connection, setConnection] = useState(null);
 
@@ -212,47 +210,12 @@ const leaveChat = async () => {
     setUserName("")
 };
 
-const sendMessage = async () => {
-    if (!message.trim()) {
-        return;
-    }
-
-    const newMessage = {
-        userId: currentUser.id,
-        body: message
-    };
-
-    try {
-        const response = await fetch(
-            "https://localhost:7087/api/messages",
-            {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify(newMessage)
-            }
-        );
-
-        if (!response.ok) {
-            throw new Error("Failed to send message");
-        }
-
-        setMessage("");
-
-    } catch (error) {
-        console.error("Error sending message:", error);
-    }
-};
-
 /*
  * JOIN SCREEN
  */
 if (!currentUser) {
     return (
         <JoinScreen
-            userName={userName}
-            setUserName={setUserName}
             joinChat={joinChat}
         />
     );
@@ -266,9 +229,6 @@ return (
         currentUser={currentUser}
         users={users}
         messages={messages}
-        message={message}
-        setMessage={setMessage}
-        sendMessage={sendMessage}
         leaveChat={leaveChat}
         loading={loading} />
 );
