@@ -35,7 +35,8 @@ namespace ChatApp.Controllers
             {
                 // Direct message: deliver only to the sender and recipient
                 var targetConnections = ChatHub.GetConnections(request.UserId)
-                    .Concat(ChatHub.GetConnections(request.RecipientId.Value));
+                    .Concat(ChatHub.GetConnections(request.RecipientId.Value))
+                    .Distinct();
                 foreach (var connId in targetConnections)
                 {
                     await _hubContext.Clients.Client(connId)
