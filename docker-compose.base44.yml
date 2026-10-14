@@ -1,0 +1,68 @@
+# Base44 sandbox dev environment for the Chat Application.
+# Runs SQL Server, the ASP.NET Core API (live-reload via `dotnet watch`),
+# and the React/Vite frontend (live-reload) — all from the cloned source.
+services:
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=ChatAppDevPass!2026
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' -l 5 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+    restart: on-failure
+
+  api:
+    image: mcr.microsoft.com/dotnet/sdk:8.0
+    working_dir: /app
+    volumes:
+      - ./ChatApplication:/app
+      - nuget-cache:/root/.nuget/packages
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://0.0.0.0:8080
+      - ConnectionStrings__DefaultConnection=Server=db;Database=ChatApplicationDb;User Id=sa;Password=ChatAppDevPass!2026;TrustServerCertificate=True;
+      - CORS_ALLOWED_ORIGIN=https://3000-${BASE44_PUBLIC_HOST_SUFFIX}
+      - BASE44_PREVIEW_MODE=1
+      - DOTNET_USE_POLLING_FILE_WATCHER=1
+    ports:
+      - "8000:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+    command: ["bash", "-ec", "dotnet tool install --global dotnet-ef --version 8.0.20 2>/dev/null || true && export PATH=\"$PATH:$HOME/.dotnet/tools\" && dotnet restore && dotnet ef database update && exec dotnet watch run --no-launch-profile"]
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:8080/api/users || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 90s
+    restart: on-failure
+
+  web:
+    image: node:22
+    working_dir: /app
+    volumes:
+      - ./chat-app:/app
+      - npm-modules:/app/node_modules
+    environment:
+      - VITE_API_URL=https://8000-${BASE44_PUBLIC_HOST_SUFFIX}
+      - __VITE_ADDITIONAL_SERVER_ALLOWED_HOSTS
+      - BASE44_PREVIEW_MODE=1
+    ports:
+      - "3000:5173"
+    command: ["sh", "-ec", "npm install && exec npm run dev -- --host 0.0.0.0 --port 5173"]
+    healthcheck:
+      test: ["CMD-SHELL", "node -e \"fetch('http://localhost:5173/').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 40s
+    restart: on-failure
+
+volumes:
+  nuget-cache:
+  npm-modules:

@@ -1,8 +1,9 @@
 /* eslint-disable react-hooks/immutability */
 import { useEffect, useState } from "react";
-import { HubConnectionBuilder } from "@microsoft/signalr";
+import { HubConnectionBuilder, HttpTransportType } from "@microsoft/signalr";
 import ChatScreen from "./components/ChatScreen";
 import JoinScreen from "./components/JoinScreen";
+import { API_BASE } from "./apiBase";
 
 function App() {
     const [messages, setMessages] = useState([]);
@@ -44,7 +45,7 @@ function App() {
 
         try {
             const response = await fetch(
-                "https://localhost:7087/api/Users/Join",
+                `${API_BASE}/api/Users/Join`,
                 {
                     method: "POST",
                     headers: {
@@ -72,8 +73,15 @@ function App() {
     };
 
     const connectToChat = async (user) => {
+        // In the Base44 sandbox the preview proxy doesn't relay websocket/SSE
+        // upgrades, so we force long-polling (plain HTTP) when VITE_API_URL is
+        // set. Locally the default auto-negotiation is preserved.
+        const hubOptions = import.meta.env.VITE_API_URL
+            ? { transport: HttpTransportType.LongPolling }
+            : {};
+
         const newConnection = new HubConnectionBuilder()
-            .withUrl("https://localhost:7087/chatHub")
+            .withUrl(`${API_BASE}/chatHub`, hubOptions)
             .withAutomaticReconnect()
             .build();
 
@@ -149,7 +157,7 @@ function App() {
 const getMessages = async () => {
     try {
         const response = await fetch(
-            "https://localhost:7087/api/messages"
+            `${API_BASE}/api/messages`
         );
 
         if (!response.ok) {
@@ -181,7 +189,7 @@ const getMessages = async () => {
 const getUsers = async () => {
     try {
         const response = await fetch(
-            "https://localhost:7087/api/users"
+            `${API_BASE}/api/users`
         );
 
         if (!response.ok) {

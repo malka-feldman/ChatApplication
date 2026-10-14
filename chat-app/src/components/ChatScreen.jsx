@@ -15,6 +15,7 @@ import {
 import { useState } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SendIcon from "@mui/icons-material/Send";
+import { API_BASE } from "../apiBase";
 
 function ChatScreen({
     users,
@@ -39,7 +40,7 @@ function ChatScreen({
 
         try {
             const response = await fetch(
-                "https://localhost:7087/api/messages",
+                `${API_BASE}/api/messages`,
                 {
                     method: "POST",
                     headers: {

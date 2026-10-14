@@ -21,12 +21,17 @@ builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<MessageService>();
 builder.Services.AddSignalR();
 
+var allowedOrigins =
+    builder.Configuration["CORS_ALLOWED_ORIGIN"]
+        ?.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+    ?? new[] { "http://localhost:5173" };
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("ReactPolicy", policy =>
     {
         policy
-            .WithOrigins("http://localhost:5173")
+            .WithOrigins(allowedOrigins)
             .AllowAnyHeader()
             .AllowAnyMethod()
             .AllowCredentials();
@@ -43,7 +48,13 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// HTTPS redirection is skipped in the Base44 sandbox (the preview proxy
+// terminates TLS and forwards plain HTTP to the container). Outside the
+// sandbox the original behaviour is preserved.
+if (Environment.GetEnvironmentVariable("BASE44_PREVIEW_MODE") != "1")
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 
