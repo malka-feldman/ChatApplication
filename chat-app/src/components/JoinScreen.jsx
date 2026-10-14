@@ -32,7 +32,7 @@ function JoinScreen({ joinChat }) {
                 <Typography
                     variant="h4"
                     fontWeight="bold"
-                    textAlign="center"
+                    align="center"
                     gutterBottom
                 >
                     Chat App
@@ -40,7 +40,7 @@ function JoinScreen({ joinChat }) {
 
                 <Typography
                     color="text.secondary"
-                    textAlign="center"
+                    align="center"
                     sx={{ mb: 3 }}
                 >
                     Enter your name to join the chat
