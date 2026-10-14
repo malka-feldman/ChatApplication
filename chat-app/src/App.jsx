@@ -168,6 +168,7 @@ const getMessages = async () => {
 
         setMessages(
             data.map(message => ({
+                id: message.id,
                 text: message.body,
                 sender:
                     message.userId === currentUser?.id
