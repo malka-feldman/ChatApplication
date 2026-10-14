@@ -30,10 +30,23 @@ namespace ChatApp.Controllers
         {
 
             var msgResponse = await _messageService.CreateMessageAsync(request);
-            await _hubContext.Clients.All.SendAsync(
-            "ReceiveMessage",
-            msgResponse
-        );
+
+            if (request.RecipientId.HasValue)
+            {
+                // Direct message: deliver only to the sender and recipient
+                var targetConnections = ChatHub.GetConnections(request.UserId)
+                    .Concat(ChatHub.GetConnections(request.RecipientId.Value));
+                foreach (var connId in targetConnections)
+                {
+                    await _hubContext.Clients.Client(connId)
+                        .SendAsync("ReceiveMessage", msgResponse);
+                }
+            }
+            else
+            {
+                await _hubContext.Clients.All.SendAsync("ReceiveMessage", msgResponse);
+            }
+
             return Ok(msgResponse);
         }
     }

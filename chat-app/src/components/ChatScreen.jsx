@@ -5,8 +5,8 @@ import {
     Button,
     Divider,
     List,
-    ListItem,
     ListItemAvatar,
+    ListItemButton,
     ListItemText,
     Avatar,
     CircularProgress,
@@ -15,6 +15,7 @@ import {
 import { useState } from "react";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SendIcon from "@mui/icons-material/Send";
+import ForumIcon from "@mui/icons-material/Forum";
 import { API_BASE } from "../apiBase";
 
 function ChatScreen({
@@ -23,6 +24,8 @@ function ChatScreen({
     messages,
     loading,
     leaveChat,
+    activeChat,
+    onSelectChat,
 })
 
 {
@@ -35,7 +38,8 @@ function ChatScreen({
 
         const newMessage = {
             userId: currentUser.id,
-            body: message
+            body: message,
+            recipientId: activeChat ? activeChat.id : null
         };
 
         try {
@@ -128,8 +132,32 @@ function ChatScreen({
                     <Divider />
 
                     <List>
+                        <ListItemButton
+                            selected={!activeChat}
+                            onClick={() => onSelectChat(null)}
+                        >
+                            <ListItemAvatar>
+                                <Avatar sx={{ bgcolor: "primary.main" }}>
+                                    <ForumIcon />
+                                </Avatar>
+                            </ListItemAvatar>
+                            <ListItemText
+                                primary={
+                                    <Typography fontWeight="bold">
+                                        Public Chat
+                                    </Typography>
+                                }
+                            />
+                        </ListItemButton>
+
+                        <Divider sx={{ my: 1 }} />
+
                         {users.map(user => (
-                            <ListItem key={user.id}>
+                            <ListItemButton
+                                key={user.id}
+                                selected={activeChat?.id === user.id}
+                                onClick={() => onSelectChat(user)}
+                            >
                                 <ListItemAvatar>
                                     <Box sx={{ position: "relative" }}>
                                         <Avatar>
@@ -180,7 +208,7 @@ function ChatScreen({
                                         </Box>
                                     }
                                 />
-                            </ListItem>
+                            </ListItemButton>
                         ))}
                     </List>
                 </Paper>
@@ -194,6 +222,23 @@ function ChatScreen({
                         minWidth: 0
                     }}
                 >
+
+                    {/* CONVERSATION HEADER */}
+                    <Box
+                        sx={{
+                            px: 2,
+                            py: 1.5,
+                            borderBottom: 1,
+                            borderColor: "divider",
+                            bgcolor: "grey.50"
+                        }}
+                    >
+                        <Typography variant="subtitle1" fontWeight="bold">
+                            {activeChat
+                                ? `Direct message with ${activeChat.name}`
+                                : "Public Chat"}
+                        </Typography>
+                    </Box>
 
                     {/* MESSAGES */}
                     <Box

@@ -5,7 +5,22 @@ namespace ChatApplication.Hubs
 {
     public class ChatHub : Hub
     {
-        private static readonly ConcurrentDictionary<int, HashSet<string>> OnlineUsers = new();
+        public static readonly ConcurrentDictionary<int, HashSet<string>> OnlineUsers = new();
+
+        /// <summary>
+        /// Returns all active SignalR connection IDs for a given user.
+        /// </summary>
+        public static IEnumerable<string> GetConnections(int userId)
+        {
+            if (OnlineUsers.TryGetValue(userId, out var connections))
+            {
+                lock (connections)
+                {
+                    return connections.ToList();
+                }
+            }
+            return Enumerable.Empty<string>();
+        }
 
         //invoked when user logs in
         public async Task JoinChat(int userId)

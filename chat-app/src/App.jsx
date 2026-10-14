@@ -11,6 +11,7 @@ function App() {
     const [currentUser, setCurrentUser] = useState(null);
     const [loading, setLoading] = useState(true);
     const [connection, setConnection] = useState(null);
+    const [activeChat, setActiveChat] = useState(null);
 
 
     useEffect(() => {
@@ -140,7 +141,8 @@ function App() {
                 sentAt: message.sentAt,
                 userName: message.userName,
                 id: message.id,
-                userId: message.userId
+                userId: message.userId,
+                recipientId: message.recipientId
             }
         ]);
     });
@@ -176,7 +178,8 @@ const getMessages = async () => {
                         : "received",
                 sentAt: message.sentAt,
                 userName: message.userName,
-                userId: message.userId
+                userId: message.userId,
+                recipientId: message.recipientId
             }))
         );
 
@@ -209,6 +212,13 @@ const getUsers = async () => {
     }
 };
 
+const filteredMessages = activeChat
+    ? messages.filter(msg =>
+        (msg.userId === currentUser.id && msg.recipientId === activeChat.id) ||
+        (msg.userId === activeChat.id && msg.recipientId === currentUser.id)
+    )
+    : messages.filter(msg => !msg.recipientId);
+
 const leaveChat = async () => {
     if (connection) {
         await connection.stop();
@@ -236,7 +246,9 @@ return (
     <ChatScreen
         currentUser={currentUser}
         users={users}
-        messages={messages}
+        messages={filteredMessages}
+        activeChat={activeChat}
+        onSelectChat={setActiveChat}
         leaveChat={leaveChat}
         loading={loading} />
 );

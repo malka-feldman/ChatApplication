@@ -13,4 +13,14 @@ public class ChatAppDbContext : DbContext
     public DbSet<User> Users { get; set; }
 
     public DbSet<Message> Messages { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<Message>()
+            .HasOne(m => m.Recipient)
+            .WithMany()
+            .HasForeignKey(m => m.RecipientId)
+            .IsRequired(false)
+            .OnDelete(DeleteBehavior.Restrict);
+    }
 }

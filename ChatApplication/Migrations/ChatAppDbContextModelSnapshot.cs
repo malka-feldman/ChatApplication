@@ -34,6 +34,9 @@ namespace ChatApplication.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("RecipientId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("SentAt")
                         .HasColumnType("datetime2");
 
@@ -41,6 +44,8 @@ namespace ChatApplication.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("RecipientId");
 
                     b.HasIndex("UserId");
 
@@ -73,11 +78,18 @@ namespace ChatApplication.Migrations
 
             modelBuilder.Entity("ChatApplication.Models.Message", b =>
                 {
+                    b.HasOne("ChatApplication.Models.User", "Recipient")
+                        .WithMany()
+                        .HasForeignKey("RecipientId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("ChatApplication.Models.User", "User")
                         .WithMany("Messages")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("Recipient");
 
                     b.Navigation("User");
                 });
